@@ -1,0 +1,14 @@
+{
+    "A009": {
+        "destination": "C13",
+        "ttl": 16
+    },
+    "A239": {
+        "destination": "LS",
+        "ttl": 24
+    },
+    "A641": {
+        "destination": "HS",
+        "ttl": 16
+    }
+}
