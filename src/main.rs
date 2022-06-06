@@ -20,7 +20,7 @@ use std::collections::{HashMap};
 type WormHoleType = HashMap<String, Wormhole>;
 
 use wormhole_charter::{Signature};
-use wormhole_charter_derive::{Signature};
+use wormhole_charter_derive::{Signature, add_field};
 // trait Signature {
 //     fn id(&self) -> String;
 //     fn name(&self) -> String;
@@ -35,11 +35,8 @@ struct CombatSignature {
 }
 // sig!(CombatSignature);
 
-struct GasSignature {
-    id: String,
-    name: String,
-    lifetime: usize,
-}
+#[add_field]
+struct GasSignature {}
 // sig!(GasSignature);
 
 #[derive(Serialize, Deserialize, Debug)]
