@@ -88,4 +88,13 @@ dependencies = [
  "serde",
  "serde_json",
  "syn",
+ "wormhole_charter_derive",
+]
+
+[[package]]
+name = "wormhole_charter_derive"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]

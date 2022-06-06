@@ -19,32 +19,28 @@ use std::io::{BufReader};
 use std::collections::{HashMap};
 type WormHoleType = HashMap<String, Wormhole>;
 
-use wormhole_charter::{Signature, sig};
+use wormhole_charter::{Signature};
+use wormhole_charter_derive::{Signature};
 // trait Signature {
 //     fn id(&self) -> String;
 //     fn name(&self) -> String;
 //     fn lifetime(&self) -> usize;
 // }
 
+#[derive(Signature)]
 struct CombatSignature {
     id: String,
     name: String,
     lifetime: usize,
 }
-sig!(CombatSignature);
-// impl Signature for CombatSignature {
-//     fn id(&self) -> String {
-//         self.id.clone()
-//     }
-//     fn name(&self) -> String {
-//         self.name.clone()
-//     }
-//     fn lifetime(&self) -> usize {
-//         self.lifetime
-//     }
-// }
+// sig!(CombatSignature);
 
-// custom macro, expands to implement default of Signature trait
+struct GasSignature {
+    id: String,
+    name: String,
+    lifetime: usize,
+}
+// sig!(GasSignature);
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Wormhole {
