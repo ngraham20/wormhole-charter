@@ -73,11 +73,13 @@ impl WormholeLink {
     /// Merges two links, accessed from the chain by index.
     /// 
     /// The first link's side_b gets updated to the second link's side_a.
+    /// The maximum lifetime should be set to the smaller of the two to be on the safe side.
     /// Link b is removed from the chain, as link a now accounts for both.
     fn merge_links(ind_a: usize, ind_b: usize, chain: &mut Vec<WormholeLink>) {
         let link_b = chain.remove(ind_b);
         let link_a = chain.get_mut(ind_a).unwrap();
         link_a.system_b = link_b.system_a;
+        link_a.max_lifetime = std::cmp::min(link_a.max_lifetime, link_b.max_lifetime);
     }
 }
 
@@ -99,30 +101,27 @@ impl StarSystem {
         }
     }
 
-    fn discover_signature(&mut self, sig: CosmicSignature) {
-        self.cosmic_signatures.push(sig);
-    }
-
-    /// Discovers a new wormhole cosmic signature in this system
-    /// - Check the wormhole information file and determine maximum lifetime based on wormhole type
-    fn discover_wormhole(&mut self, wormhole: Wormhole, chain: &mut Vec<WormholeLink>) {
-        // TODO call wormhole information file in here to automate maximum lifetime in minutes
-        chain.push(WormholeLink {
-            system_a: self.name.clone(),
-            system_b: "Unknown Star System".to_string(),
-            wh_type: wormhole.wh_type.clone(),
-            max_lifetime: 42,
-            age: 0
-        });
-        self.cosmic_signatures.push(CosmicSignature::Wormhole(wormhole));
-    }
-
-    fn discover_signatures(&mut self, sigs: Vec<CosmicSignature>) {
-        for sig in sigs.iter() {
-            // match sig {
-                
-            // }
-        }
+    /// Discovers a new cosmic signature in the current system.
+    /// 
+    /// - If the signature is a wormhole, create a new link in the wormhole chain
+    ///     - Call on the wormhole type file to automatically fill the maximum lifetime stat
+    /// - If the signature is anything else, don't worry about it
+    /// - Regardless, add the signature to the list of signatures in the system
+    fn discover_signature(&mut self, sig: CosmicSignature, wh_chain: &mut Vec<WormholeLink>) {
+       match &sig {
+           CosmicSignature::Wormhole(w) => {
+                // TODO call wormhole information file in here to automate maximum lifetime in minutes
+                wh_chain.push(WormholeLink {
+                    system_a: self.name.clone(),
+                    system_b: "Unknown Star System".to_string(),
+                    wh_type: w.wh_type.clone(),
+                    max_lifetime: 42,
+                    age: 0
+                })
+            }
+            _ => {}
+       }
+       self.cosmic_signatures.push(sig);
     }
 }
 
@@ -164,18 +163,19 @@ fn main() {
         cosmic_signatures: Vec::new()
     };
 
-    sol.discover_signature(sig_a.clone());
-    sol.discover_signature(sig_b.clone());
-    sol.discover_signature(sig_w.clone());
+    let mut wormhole_chain: Vec<WormholeLink> = Vec::new();
+    sol.discover_signature(sig_a.clone(), &mut wormhole_chain);
+    sol.discover_signature(sig_b.clone(), &mut wormhole_chain);
+    sol.discover_signature(sig_w.clone(), &mut wormhole_chain);
 
     let mut kerbol = StarSystem {
         name: "Kerbol".to_string(),
         cosmic_signatures: Vec::new()
     };
 
-    kerbol.discover_signature(sig_a);
-    kerbol.discover_signature(sig_b);
-    kerbol.discover_signature(sig_w);
+    kerbol.discover_signature(sig_a, &mut wormhole_chain);
+    kerbol.discover_signature(sig_b, &mut wormhole_chain);
+    kerbol.discover_signature(sig_w, &mut wormhole_chain);
 
     let link_a = WormholeLink {
         system_a: "Sol".to_string(),
@@ -184,8 +184,6 @@ fn main() {
         max_lifetime: 16,
         age: 0
     };
-
-    let mut wormhole_chain: Vec<WormholeLink> = Vec::new();
     wormhole_chain.push(link_a);
     let mut star_systems: HashMap<String, StarSystem> = HashMap::new();
     star_systems.insert(sol.name.clone(), sol);
