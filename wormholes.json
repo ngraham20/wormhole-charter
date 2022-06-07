@@ -1,14 +1,14 @@
 {
     "A009": {
         "destination": "C13",
-        "ttl": 16
+        "max_age_minutes": 960
     },
     "A239": {
         "destination": "LS",
-        "ttl": 24
+        "max_age_minutes": 1440
     },
     "A641": {
         "destination": "HS",
-        "ttl": 16
+        "max_age_minutes": 960
     }
 }

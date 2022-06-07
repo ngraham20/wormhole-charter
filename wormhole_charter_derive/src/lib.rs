@@ -21,8 +21,11 @@ fn impl_signature_derive(ast: &syn::DeriveInput) -> TokenStream {
             fn name(&self) -> String {
                 self.name.clone()
             }
-            fn lifetime(&self) -> usize {
-                self.lifetime
+            fn age(&self) -> usize {
+                self.age
+            }
+            fn increment_age(&mut self) {
+                self.age += 1;
             }
         }
     };
@@ -42,7 +45,7 @@ pub fn signature(_args: TokenStream, input: TokenStream) -> TokenStream  {
                 syn::Fields::Named(fields) => {
                     fields.named.push(syn::Field::parse_named.parse2(quote! {id: String}).unwrap());
                     fields.named.push(syn::Field::parse_named.parse2(quote! {name: String}).unwrap());
-                    fields.named.push(syn::Field::parse_named.parse2(quote! {lifetime: usize}).unwrap());
+                    fields.named.push(syn::Field::parse_named.parse2(quote! {age: usize}).unwrap());
                 }   
                 _ => {
                     ()
