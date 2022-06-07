@@ -7,49 +7,34 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{BufReader};
 use std::collections::{HashMap};
-type WormHoleType = HashMap<String, Wormhole>;
 
-use wormhole_charter::{Signature};
-use wormhole_charter_derive::{signature, Signature};
+#[derive(Clone)]
+enum CosmicSignature {
+    CombatSite(Signature),
+    DataSite(Signature),
+    ReliceSite(Signature),
+    GasSite(Signature),
+    OreSite(Signature),
+    Wormhole(Wormhole)
+}
 
-#[signature]
-#[derive(Signature, Clone)]
-struct CombatSite {}
+#[derive(Clone)]
+struct Signature {
+    id: String,
+    name: String,
+    age: usize,
+}
 
-#[signature]
-#[derive(Signature, Clone)]
-struct GasSite {}
 
-#[signature]
-#[derive(Signature, Clone)]
-struct DataSite {}
-
-#[signature]
-#[derive(Signature, Clone)]
-struct RelicSite {}
-
-#[signature]
-#[derive(Signature, Clone)]
-struct OreSite {}
-
-#[signature]
+// #[signature]
 #[derive(Clone)]
 struct Wormhole {
+    id: String,
+    name: String,
+    age: usize,
     wh_type: String
 }
-impl Signature for Wormhole {
-    fn id(&self) -> String {
-        self.id.clone()
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    fn age(&self) -> usize {
-        self.age
-    }
-
+impl Wormhole {
     fn increment_age(&mut self) {
         self.age += 1;
     }
@@ -98,7 +83,7 @@ impl WormholeLink {
 
 struct StarSystem {
     name: String,
-    cosmic_signatures: Vec<Box<dyn Signature>>
+    cosmic_signatures: Vec<CosmicSignature>
 }
 impl StarSystem {
     fn new() -> Self {
@@ -107,11 +92,20 @@ impl StarSystem {
             cosmic_signatures: Vec::new()
         }
     }
-    fn discover_signature(&mut self, sig: Box<dyn Signature>) {
+    fn named(name: String) -> Self {
+        StarSystem {
+            name: name,
+            cosmic_signatures: Vec::new()
+        }
+    }
+
+    fn discover_signature(&mut self, sig: CosmicSignature) {
         self.cosmic_signatures.push(sig);
     }
 
-    fn discover_wormhole(&mut self, wormhole: Box<Wormhole>, chain: &mut Vec<WormholeLink>) {
+    /// Discovers a new wormhole cosmic signature in this system
+    /// - Check the wormhole information file and determine maximum lifetime based on wormhole type
+    fn discover_wormhole(&mut self, wormhole: Wormhole, chain: &mut Vec<WormholeLink>) {
         // TODO call wormhole information file in here to automate maximum lifetime in minutes
         chain.push(WormholeLink {
             system_a: self.name.clone(),
@@ -120,7 +114,15 @@ impl StarSystem {
             max_lifetime: 42,
             age: 0
         });
-        self.cosmic_signatures.push(wormhole);
+        self.cosmic_signatures.push(CosmicSignature::Wormhole(wormhole));
+    }
+
+    fn discover_signatures(&mut self, sigs: Vec<CosmicSignature>) {
+        for sig in sigs.iter() {
+            // match sig {
+                
+            // }
+        }
     }
 }
 
@@ -140,32 +142,40 @@ impl StarSystem {
 
 fn main() {
 
-    let sig_a = CombatSite {
+    let sig_a = CosmicSignature::CombatSite(Signature {
         id: "ABC-123".to_string(),
         name: "Perimeter Combat Site".to_string(),
         age: 0,
-    };
-    let sig_b = GasSite {
+    });
+    let sig_b = CosmicSignature::GasSite(Signature {
         id: "CBA-321".to_string(),
         name: "Bountiful Gas Site".to_string(),
         age: 0,
-    };
+    });
+    let sig_w = CosmicSignature::Wormhole(Wormhole {
+        id: "BAC-213".to_string(),
+        name: "Unstable Wormhole".to_string(),
+        age: 0,
+        wh_type: "K162".to_string(), 
+    });
     
     let mut sol = StarSystem {
         name: "Sol".to_string(),
         cosmic_signatures: Vec::new()
     };
 
-    sol.cosmic_signatures.push(Box::new(sig_a.clone()));
-    sol.cosmic_signatures.push(Box::new(sig_b.clone()));
+    sol.discover_signature(sig_a.clone());
+    sol.discover_signature(sig_b.clone());
+    sol.discover_signature(sig_w.clone());
 
     let mut kerbol = StarSystem {
         name: "Kerbol".to_string(),
         cosmic_signatures: Vec::new()
     };
 
-    kerbol.cosmic_signatures.push(Box::new(sig_a));
-    kerbol.cosmic_signatures.push(Box::new(sig_b));
+    kerbol.discover_signature(sig_a);
+    kerbol.discover_signature(sig_b);
+    kerbol.discover_signature(sig_w);
 
     let link_a = WormholeLink {
         system_a: "Sol".to_string(),
@@ -186,7 +196,14 @@ fn main() {
         println!("{} has the following signatures: ", link.system_a);
         if let Some(system) = star_systems.get(&link.system_a) {
             for sig in system.cosmic_signatures.iter() {
-                println!("{}", sig.name());
+                match sig {
+                    CosmicSignature::CombatSite(s) |
+                    CosmicSignature::DataSite(s) |
+                    CosmicSignature::ReliceSite(s) |
+                    CosmicSignature::GasSite(s) |
+                    CosmicSignature::OreSite(s) => {println!("{}", s.name)}
+                    CosmicSignature::Wormhole(w) => {println!("{}", w.name)}
+                }
             }
         }
     }
