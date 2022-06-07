@@ -1,3 +1,7 @@
+// pub trait Discoverable {
+//     fn discover() -> Self;
+// }
+
 pub trait Signature {
     fn id(&self) -> String;
     fn name(&self) -> String;

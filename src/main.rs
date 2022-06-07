@@ -33,19 +33,95 @@ struct RelicSite {}
 struct OreSite {}
 
 #[signature]
-#[derive(Signature, Clone)]
-struct Wormhole {}
+#[derive(Clone)]
+struct Wormhole {
+    wh_type: String
+}
+impl Signature for Wormhole {
+    fn id(&self) -> String {
+        self.id.clone()
+    }
 
-use core::cell::RefCell;
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn age(&self) -> usize {
+        self.age
+    }
+
+    fn increment_age(&mut self) {
+        self.age += 1;
+    }
+}
+
 struct WormholeLink {
     system_a: String,
     system_b: String,
+    wh_type: String,
     max_lifetime: usize,
+    age: usize
+}
+impl WormholeLink {
+    /// Calculates the Time to Live for the wormhole.
+    /// 
+    /// This is based on the maximum lifetime, the age, and the discovery of EoL status.
+    /// 
+    /// ### EXAMPLE
+    /// - Suppose the hole's maximum lifetime is 16 hours
+    /// - Suppose it was discovered 10 hours into its lifetime
+    /// - age: 0, max_lifetime: 16, est. ttl: 16, true ttl: 6
+    /// When 3 hours pass, someone notices the hole is EoL  
+    /// Can we calculate the minimum possible ttl? The true ttl is 3.
+    /// Max est. ttl is 4, the age since discovery is 3.
+    /// The EoL status must have happened at _worst_, just after discovery.
+    /// Therefore, if the age is less than 4, then the minimum ttl is 4-age.
+    /// If the age is higher than 4, assume critical ttl.
+    fn calculate_time_to_live(&self) -> (usize, usize) {
+        todo!();
+    }
+
+    fn increment_age(&mut self) {
+        self.age += 1;
+    }
+
+    /// Merges two links, accessed from the chain by index.
+    /// 
+    /// The first link's side_b gets updated to the second link's side_a.
+    /// Link b is removed from the chain, as link a now accounts for both.
+    fn merge_links(ind_a: usize, ind_b: usize, chain: &mut Vec<WormholeLink>) {
+        let link_b = chain.remove(ind_b);
+        let link_a = chain.get_mut(ind_a).unwrap();
+        link_a.system_b = link_b.system_a;
+    }
 }
 
 struct StarSystem {
     name: String,
     cosmic_signatures: Vec<Box<dyn Signature>>
+}
+impl StarSystem {
+    fn new() -> Self {
+        StarSystem {
+            name: "Unknown System".to_string(),
+            cosmic_signatures: Vec::new()
+        }
+    }
+    fn discover_signature(&mut self, sig: Box<dyn Signature>) {
+        self.cosmic_signatures.push(sig);
+    }
+
+    fn discover_wormhole(&mut self, wormhole: Box<Wormhole>, chain: &mut Vec<WormholeLink>) {
+        // TODO call wormhole information file in here to automate maximum lifetime in minutes
+        chain.push(WormholeLink {
+            system_a: self.name.clone(),
+            system_b: "Unknown Star System".to_string(),
+            wh_type: wormhole.wh_type.clone(),
+            max_lifetime: 42,
+            age: 0
+        });
+        self.cosmic_signatures.push(wormhole);
+    }
 }
 
 
@@ -94,7 +170,9 @@ fn main() {
     let link_a = WormholeLink {
         system_a: "Sol".to_string(),
         system_b: "Kerbol".to_string(),
-        max_lifetime: 64
+        wh_type: "C247".to_string(),
+        max_lifetime: 16,
+        age: 0
     };
 
     let mut wormhole_chain: Vec<WormholeLink> = Vec::new();

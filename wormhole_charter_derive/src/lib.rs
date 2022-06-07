@@ -32,9 +32,7 @@ fn impl_signature_derive(ast: &syn::DeriveInput) -> TokenStream {
     gen.into()
 }
 
-// use proc_macro::TokenStream;
 use syn::{parse_macro_input, DeriveInput, parse::Parser};
-// use quote::quote;
 
 #[proc_macro_attribute]
 pub fn signature(_args: TokenStream, input: TokenStream) -> TokenStream  {
