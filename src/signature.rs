@@ -2,13 +2,6 @@
 ///  EVE Online Wormhole Tracker -- Signature Library
 /// #######################################################
 
-use serde::{Serialize, Deserialize};
-use syn::token::Star;
-use std::error::Error;
-use std::fs::File;
-use std::io::{BufReader};
-
-
 /// Cosmic Signature
 /// 
 /// All Cosmic Signatures are Signatures, except for Wormhole, which is its own type
@@ -79,11 +72,17 @@ impl WormholeLink {
         todo!();
     }
 
-    fn establish_link(system: &StarSystem, sig: &CosmicSignature) {
-
+    fn establish(system: &StarSystem, sig: &Wormhole) -> Self {
+        WormholeLink {
+            system_a: (system.name.clone(), sig.id.clone()),
+            system_b: ("Unknown Star System".to_string(), "???-???".to_string()),
+            wh_type: "????".to_string(),
+            max_lifetime: 969,
+            age: 0
+        }
     }
 
-    fn traverse_link(&mut self, system: &StarSystem) {
+    fn traverse(&mut self, system: &StarSystem) {
 
     }
 
@@ -91,7 +90,7 @@ impl WormholeLink {
 
     }
 
-    fn complete_link(&mut self, sig: &CosmicSignature) {
+    fn complete(&mut self, sig: &CosmicSignature) {
         
     }
 }
@@ -124,15 +123,16 @@ impl StarSystem {
        match &sig {
            CosmicSignature::Wormhole(w) => {
                 // TODO call wormhole information file in here to automate maximum lifetime in minutes
-                wh_chain.push(WormholeLink {
-                    system_a: self.name.clone(),
-                    system_a_sig: w.id.clone(),
-                    system_b: "Unknown Star System".to_string(),
-                    system_b_sig: "???-???".to_string(),
-                    wh_type: w.wh_type.clone(),
-                    max_lifetime: 42,
-                    age: 0
-                })
+                // wh_chain.push(WormholeLink {
+                //     system_a: self.name.clone(),
+                //     system_a_sig: w.id.clone(),
+                //     system_b: "Unknown Star System".to_string(),
+                //     system_b_sig: "???-???".to_string(),
+                //     wh_type: w.wh_type.clone(),
+                //     max_lifetime: 42,
+                //     age: 0
+                // })
+                wh_chain.push(WormholeLink::establish(self, w));
             }
             _ => {}
        }

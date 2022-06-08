@@ -56,9 +56,9 @@ fn main() {
     star_systems.insert(kerbol.name.clone(), kerbol);
 
     for link in wormhole_chain {
-        println!("Wormhole links {} ({}) to {} ({})", link.system_a, link.system_a_sig, link.system_b, link.system_b_sig);
-        println!("{} has the following signatures: ", link.system_a);
-        if let Some(system) = star_systems.get(&link.system_a) {
+        println!("Wormhole links {} ({}) to {} ({})", link.system_a.0, link.system_a.1, link.system_b.0, link.system_b.1);
+        println!("{} has the following signatures: ", link.system_a.0);
+        if let Some(system) = star_systems.get(&link.system_a.0) {
             for sig in system.cosmic_signatures.iter() {
                 match sig {
                     CosmicSignature::CombatSite(s) |
